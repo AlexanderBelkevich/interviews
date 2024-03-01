@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "jsx": "preserve",
+    "strict": true,
+    "esModuleInterop": true,
+    "baseUrl": "./",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ],
+      "~/*": [
+        "node_modules/*"
+      ]
+    },
+    "moduleResolution": "node"
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue"
+    // Include .vue files
+  ],
+  "exclude": [
+    "src/**/__tests__/*",
+    "../list-interview-old/tailwind.config.js"
+  ]
+}
