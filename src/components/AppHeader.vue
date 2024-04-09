@@ -1,42 +1,64 @@
-<script setup lang="ts">
-import {ref} from "vue";
-import Menubar from 'primevue/menubar';
-import Avatar from 'primevue/avatar';
+<script lang="ts" setup>
+import { ref, computed } from 'vue'
+import { useUserStore } from '@/stores/user'
+import { getAuth, signOut } from 'firebase/auth'
+
+const auth = getAuth()
+
+const userStore = useUserStore()
 
 const items = ref([
   {
     label: 'Авторизация',
-    icon: 'pi pi-user'
+    icon: 'pi pi-user',
+    path: '/auth',
+    show: computed(() => !userStore.userId)
+  },
+  {
+    label: 'Добавить',
+    icon: 'pi pi-plus',
+    path: '/',
+    show: computed(() => userStore.userId)
   },
   {
     label: 'Список собеседований',
-    icon: 'pi pi-list'
+    icon: 'pi pi-list',
+    path: '/list',
+    show: computed(() => userStore.userId)
   },
   {
     label: 'Статистика',
-    icon: 'pi pi-chart-pie'
-  },
-]);
+    icon: 'pi pi-chart-pie',
+    path: '/statistic',
+    show: computed(() => userStore.userId)
+  }
+])
 </script>
 
 <template>
-  <Menubar :model="items" class="menu">
+  <app-menubar :model="items" class="menu">
     <template #item="{ item, props }">
-      <a class="flex align-items-center" v-bind="props.action">
-        <span class="p-menuitem-icon" :class="item.icon"/>
-        <span class="ml-2">{{ item.label }}</span>
-      </a>
+      <template v-if="item.show">
+        <router-link :to="item.path" class="flex align-items-center" v-bind="props.action">
+          <span :class="item.icon" class="p-menuitem-icon" />
+          <span class="ml-2">{{ item.label }}</span>
+        </router-link>
+      </template>
     </template>
     <template #end>
-      <div class="flex align-items-center gap-2">
-        <Avatar image="/images/avatar/amyelsner.png" shape="circle"/>
-      </div>
+      <span class="flex align-items-center menu-exit">
+        <span class="pi pi-sign-out p-menuitem-icon" />
+        <span class="ml-2">Выход</span>
+      </span>
     </template>
-  </Menubar>
+  </app-menubar>
 </template>
 
 <style scoped>
 .menu {
-  margin: 30px;
+  margin: 30px 0;
+}
+.menu-exit {
+  cursor: pointer;
 }
 </style>
