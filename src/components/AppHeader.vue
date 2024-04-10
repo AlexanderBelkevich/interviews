@@ -2,8 +2,10 @@
 import { ref, computed } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { getAuth, signOut } from 'firebase/auth'
+import { useRouter } from 'vue-router'
 
 const auth = getAuth()
+const router = useRouter()
 
 const userStore = useUserStore()
 
@@ -33,6 +35,11 @@ const items = ref([
     show: computed(() => userStore.userId)
   }
 ])
+
+const signOutMethod = async () => {
+  await signOut(auth)
+  router.push('/auth')
+}
 </script>
 
 <template>
@@ -46,7 +53,7 @@ const items = ref([
       </template>
     </template>
     <template #end>
-      <span class="flex align-items-center menu-exit">
+      <span class="flex align-items-center menu-exit" @click="signOutMethod">
         <span class="pi pi-sign-out p-menuitem-icon" />
         <span class="ml-2">Выход</span>
       </span>
