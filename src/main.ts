@@ -12,6 +12,7 @@ import PrimeVue from 'primevue/config'
 import App from './App.vue'
 import router from './router'
 import ToastService from 'primevue/toastservice'
+import ConfirmationService from 'primevue/confirmationservice'
 import Menubar from 'primevue/menubar'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
@@ -23,10 +24,12 @@ import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Textarea from 'primevue/textarea'
 import InlineMessage from 'primevue/inlinemessage'
-import SelectButton from 'primevue/selectbutton'
+import RadioButton from 'primevue/radiobutton'
 import Tooltip from 'primevue/tooltip'
 import Badge from 'primevue/badge'
 import Chart from 'primevue/chart'
+import InputNumber from 'primevue/inputnumber'
+import ConfirmDialog from 'primevue/confirmdialog'
 
 const firebaseConfig = {
   apiKey: 'AIzaSyDtpZ8R3VjpEc9STZrvv8APoCBUbUVP9fQ',
@@ -47,6 +50,7 @@ app.use(PrimeVue, {
   locale: ru
 })
 app.use(ToastService)
+app.use(ConfirmationService)
 app.directive('tooltip', Tooltip)
 app.component('app-menubar', Menubar)
 app.component('app-inputext', InputText)
@@ -59,8 +63,10 @@ app.component('app-datatable', DataTable)
 app.component('app-column', Column)
 app.component('app-textarea', Textarea)
 app.component('app-inlinemessage', InlineMessage)
-app.component('app-selectbutton', SelectButton)
+app.component('app-radio', RadioButton)
 app.component('app-badge', Badge)
 app.component('app-chart', Chart)
+app.component('app-inputnumber', InputNumber)
+app.component('app-dialog', ConfirmDialog)
 
 app.mount('#app')

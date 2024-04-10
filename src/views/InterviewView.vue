@@ -1,46 +1,46 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { getFirestore, doc, getDoc, updateDoc } from 'firebase/firestore'
 import { useUserStore } from '@/stores/user'
-import { IInterview } from '@/interfaces'
+import { IInterview, IStage } from '@/interfaces'
 import dayjs from 'dayjs'
 
 const db = getFirestore()
 const route = useRoute()
+const router = useRouter()
 const userStore = useUserStore()
 
 const isLoading = ref<boolean>(true)
 const interview = ref<IInterview>()
 
-const resultInterview = ref<string[]>(['Отказ', 'Оффер'])
-
 const docref = doc(db, `users/${userStore.userId}/interviews`, route.params.id as string)
 
-const getData = async () => {
+const getData = async (): Promise<void> => {
   isLoading.value = true
-  const docSnap = await getDoc(docref)
-  interview.value = docSnap.data() as IInterview
-  console.log(interview.value)
+  const docSnapshot = await getDoc(docref)
+  interview.value = docSnapshot.data() as IInterview
 
   isLoading.value = false
 }
 
-const saveInterview = async () => {
+const saveInterview = async (): Promise<void> => {
   isLoading.value = true
   if (interview.value?.stages && interview.value?.stages.length) {
-    interview.value.stages = interview.value.stages.map((el) => {
+    interview.value.stages = interview.value.stages.map((el: IStage) => {
       return {
         ...el,
         date: dayjs(el.date).format('DD.MM.YYYY')
       }
     })
   }
+
   await updateDoc(docref, { ...interview.value })
+  router.push('/list')
   isLoading.value = false
 }
 
-const addStage = async () => {
+const addStage = () => {
   if (interview.value) {
     if (!interview.value.stages) {
       interview.value.stages = []
@@ -50,6 +50,12 @@ const addStage = async () => {
       date: '',
       description: ''
     })
+  }
+}
+
+const removeStage = (index: number) => {
+  if (interview.value?.stages) {
+    interview.value.stages.splice(index, 1)
   }
 }
 
@@ -93,6 +99,22 @@ onMounted(async () => await getData())
           <label for="contactPhone">Телефон HR</label>
           <app-inputext class="input mb-3" id="contactPhone" v-model="interview.contactPhone" />
         </div>
+        <div class="card flex flex-wrap gap-3 p-fluid mb-3">
+          <div class="flex-auto">
+            <app-inputnumber
+              v-model="interview.salaryFrom"
+              inputId="salaryFrom"
+              placeholder="Зарплатная вилка от"
+            />
+          </div>
+          <div class="flex-auto">
+            <app-inputnumber
+              v-model="interview.salaryTo"
+              inputId="salaryTo"
+              placeholder="Зарплатная вилка до"
+            />
+          </div>
+        </div>
         <app-button
           label="Добавить этап"
           severity="info"
@@ -123,11 +145,31 @@ onMounted(async () => await getData())
               rows="5"
             />
           </div>
+          <app-button severity="danger" label="Удалить этап" @click="removeStage(i)" />
         </div>
-        <div class="mb-3">
-          <app-selectbutton :options="resultInterview" v-model="interview.result" />
+        <div class="flex flex-wrap gap-3 mb-3">
+          <div class="flex align-items-center">
+            <app-radio
+              v-model="interview.result"
+              inputId="interviewResult1"
+              name="result"
+              value="Refusal"
+            />
+            <label for="interviewResult1" class="ml-2">Отказ</label>
+          </div>
+          <div class="flex align-items-center">
+            <app-radio
+              v-model="interview.result"
+              inputId="interviewResult2"
+              name="result"
+              value="Offer"
+            />
+            <label for="interviewResult2" class="ml-2">Оффер</label>
+          </div>
         </div>
-        <div><app-button label="Сохранить" icon="pi pi-save" @click="saveInterview" /></div>
+        <div>
+          <app-button label="Сохранить" icon="pi pi-save" @click="saveInterview" />
+        </div>
       </template>
     </app-card>
   </div>

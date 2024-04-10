@@ -18,7 +18,7 @@ const contactPhone = ref<string>('')
 
 const loading = ref<boolean>(false)
 
-const addNewInterview = async () => {
+const addNewInterview = async (): Promise<void> => {
   loading.value = true
 
   const payload: IInterview = {

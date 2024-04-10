@@ -14,8 +14,6 @@ const checkAuth = (
 ) => {
   const auth = getAuth()
   onAuthStateChanged(auth, (user) => {
-    console.log(user)
-
     if (user) {
       next()
     } else {

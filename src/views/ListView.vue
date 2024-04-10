@@ -1,16 +1,26 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { getFirestore, collection, query, orderBy, getDocs } from 'firebase/firestore'
+import {
+  getFirestore,
+  collection,
+  query,
+  orderBy,
+  getDocs,
+  deleteDoc,
+  doc
+} from 'firebase/firestore'
 import { useUserStore } from '@/stores/user'
 import { IInterview } from '@/interfaces'
+import { useConfirm } from 'primevue/useconfirm'
 
 const userStore = useUserStore()
+const confirm = useConfirm()
 
 const db = getFirestore()
 const interviews = ref<IInterview[]>([])
 const isLoading = ref<boolean>(true)
 
-async function getAllInterviews<T extends IInterview>(): Promise<Array<T>> {
+const getAllInterviews = async <T extends IInterview>(): Promise<Array<T>> => {
   const getData = query(
     collection(db, `users/${userStore.userId}/interviews`),
     orderBy('createdAt', 'desc')
@@ -20,16 +30,33 @@ async function getAllInterviews<T extends IInterview>(): Promise<Array<T>> {
   return partialDocs.docs.map((d) => d.data() as T)
 }
 
+const confirmRemoveInterview = async (id: string) => {
+  confirm.require({
+    message: 'Вы хотите удалить собеседование?',
+    header: 'Удаление собеседования',
+    icon: 'pi pi-info-circle',
+    rejectLabel: 'Отмена',
+    acceptLabel: 'Удалить',
+    rejectClass: 'p-button-secondary p-button-outlined',
+    acceptClass: 'p-button-danger',
+    accept: async () => {
+      isLoading.value = true
+      await deleteDoc(doc(db, `users/${userStore.userId}/interviews`, id))
+      isLoading.value = false
+    }
+  })
+}
+
 onMounted(async () => {
-  const listInterviews = await getAllInterviews()
+  const listInterviews: Array<IInterview> = await getAllInterviews()
   interviews.value = [...listInterviews]
-  console.log(interviews.value)
 
   isLoading.value = false
 })
 </script>
 
 <template>
+  <app-dialog />
   <app-spinner class="spinner" v-if="isLoading" />
   <app-inlinemessage v-else-if="!isLoading && !interviews.length" severity="info">
     Нет добавленных собеседований
@@ -90,22 +117,35 @@ onMounted(async () => {
           </div>
         </template>
       </app-column>
+      <app-column header="Зарплатная вилка">
+        <template #body="slotProps">
+          <span v-if="!slotProps.data.salaryFrom">Не заполнено</span>
+          <span v-else>{{ slotProps.data.salaryFrom }} - {{ slotProps.data.salaryTo }}</span>
+        </template>
+      </app-column>
       <app-column header="Результат">
         <template #body="slotProps">
           <span v-if="!slotProps.data.result">Не заполнено</span>
           <div v-else>
             <app-badge
-              :severity="slotProps.data.result === 'Оффер' ? 'success' : 'danger'"
-              :value="slotProps.data.result"
+              :severity="slotProps.data.result === 'Offer' ? 'success' : 'danger'"
+              :value="slotProps.data.result === 'Offer' ? 'Оффер' : 'Отказ'"
             />
           </div>
         </template>
       </app-column>
       <app-column>
         <template #body="slotProps">
-          <router-link :to="`/interview/${slotProps.data.id}`">
-            <app-button icon="pi pi-pencil" severity="info" />
-          </router-link>
+          <div class="flex gap-2">
+            <router-link :to="`/interview/${slotProps.data.id}`">
+              <app-button icon="pi pi-pencil" severity="info" />
+            </router-link>
+            <app-button
+              icon="pi pi-trash"
+              severity="danger"
+              @click="confirmRemoveInterview(slotProps.data.id)"
+            />
+          </div>
         </template>
       </app-column>
     </app-datatable>
