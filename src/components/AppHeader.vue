@@ -53,7 +53,11 @@ const signOutMethod = async () => {
       </template>
     </template>
     <template #end>
-      <span class="flex align-items-center menu-exit" @click="signOutMethod">
+      <span
+        v-if="userStore.userId"
+        class="flex align-items-center menu-exit"
+        @click="signOutMethod"
+      >
         <span class="pi pi-sign-out p-menuitem-icon" />
         <span class="ml-2">Выход</span>
       </span>

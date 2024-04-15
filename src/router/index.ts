@@ -13,10 +13,14 @@ const checkAuth = (
   next: NavigationGuardNext
 ) => {
   const auth = getAuth()
+  let authenticated = false
+
   onAuthStateChanged(auth, (user) => {
-    if (user) {
+    if (user && !authenticated) {
+      authenticated = true
       next()
-    } else {
+    } else if (!user && !authenticated) {
+      authenticated = true
       next({ path: '/auth' })
     }
   })
